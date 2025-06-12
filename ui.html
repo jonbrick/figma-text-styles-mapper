@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tailwind to Figma Converter</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 20px;
+        background: #f8fafc;
+      }
+      textarea,
+      pre {
+        width: 100%;
+        background: #f1f5f9;
+        padding: 16px;
+        border-radius: 8px;
+        border: none;
+        font-family: "SF Mono", Monaco, monospace;
+        font-size: 14px;
+        margin-bottom: 16px;
+      }
+      textarea {
+        min-height: 200px;
+        resize: vertical;
+      }
+      pre {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+      }
+      button {
+        background: #3b82f6;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      button:hover {
+        background: #2563eb;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea
+      id="input"
+      placeholder="Paste your Tailwind CSS here..."
+    ></textarea>
+    <button onclick="convert()">Convert</button>
+    <button onclick="copyOutput()">Copy Output</button>
+    <pre id="output"></pre>
+
+    <script>
+      const parseSelector = (code) => {
+        const selectorMatch = code.match(/([^{]+)\s*{\s*@apply\s*([^}]+)/);
+        if (!selectorMatch) return null;
+
+        // Clean up selector by removing comments, dots, and extra whitespace
+        const selector = selectorMatch[1]
+          .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, "") // Remove comments
+          .replace(/\./g, "") // Remove ALL dots, not just leading ones
+          .replace(/\s+/g, "") // Remove any remaining whitespace
+          .trim();
+
+        const classes = selectorMatch[2].trim();
+
+        const properties = {};
+        const customProperties = [];
+
+        // Font size - handle both standard and custom sizes
+        const standardSizeMatch = classes.match(
+          /\btext-(xs|sm|base|lg|xl|2xl|3xl|4xl|5xl|6xl|7xl|8xl|9xl)\b/
+        );
+        const customSizeMatch = classes.match(
+          /\btext-(?!xs|sm|base|lg|xl|2xl|3xl|4xl|5xl|6xl|7xl|8xl|9xl)([a-zA-Z0-9\[\]]+)\b/
+        );
+
+        if (standardSizeMatch) {
+          properties["font-size"] = `font/size/${standardSizeMatch[1]}`;
+        } else if (customSizeMatch) {
+          properties["font-size"] = `font/size/${customSizeMatch[1]}`;
+          customProperties.push("font-size");
+        }
+
+        // Font family
+        const fontFamilyMatch = classes.match(
+          /\bfont-(sans|serif|mono|\[[^\]]+\])/
+        );
+        if (fontFamilyMatch) {
+          properties["font-family"] = `font/family/${fontFamilyMatch[1]}`;
+        }
+
+        // Font weight
+        const fontWeightMatch = classes.match(
+          /\bfont-(thin|extralight|light|normal|medium|semibold|bold|extrabold|black|\[[^\]]+\])/
+        );
+        if (fontWeightMatch) {
+          properties["font-weight"] = `font/weight/${fontWeightMatch[1]}`;
+        }
+
+        // Font style
+        if (classes.includes("italic")) {
+          properties["font-style"] = "font/style/italic";
+        } else if (classes.includes("not-italic")) {
+          properties["font-style"] = "font/style/not-italic";
+        }
+
+        // Letter spacing
+        const trackingMatch = classes.match(/\btracking-([a-zA-Z0-9\[\]]+)/);
+        if (trackingMatch) {
+          properties["letter-spacing"] = `font/tracking/${trackingMatch[1]}`;
+        }
+
+        // Line height
+        const leadingMatch = classes.match(/\bleading-([a-zA-Z0-9\[\]]+)/);
+        if (leadingMatch) {
+          properties["line-height"] = `font/leading/${leadingMatch[1]}`;
+        }
+
+        if (customProperties.length > 0) {
+          properties["customProperties"] = customProperties;
+        }
+
+        return {
+          [selector]: properties,
+        };
+      };
+
+      const tailwindToFigma = (code) => {
+        // Split input by closing braces to handle multiple selectors
+        const selectors = code.split("}").filter((s) => s.trim());
+        const result = {};
+
+        selectors.forEach((selector) => {
+          const parsed = parseSelector(selector + "}");
+          if (parsed) {
+            Object.assign(result, parsed);
+          }
+        });
+
+        return JSON.stringify(result, null, 2);
+      };
+
+      const convert = () => {
+        const input = document.getElementById("input").value;
+        const output = tailwindToFigma(input);
+        document.getElementById("output").textContent = output;
+      };
+
+      const copyOutput = () => {
+        const output = document.getElementById("output").textContent;
+        navigator.clipboard.writeText(output);
+      };
+    </script>
+  </body>
+</html>
