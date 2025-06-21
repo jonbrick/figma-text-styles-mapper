@@ -1,40 +1,150 @@
-Below are the steps to get your plugin running. You can also find instructions at:
+# Figma Text Styles Mapper
 
-  https://www.figma.com/plugin-docs/plugin-quickstart-guide/
+This Figma plugin parses CSS code with Tailwind @apply directives to extract and display which Tailwind utility classes are used by each CSS selector, providing structured JSON output for design system analysis.
 
-This plugin template uses Typescript and NPM, two standard tools in creating JavaScript applications.
+## Features
 
-First, download Node.js which comes with NPM. This will allow you to install TypeScript and other
-libraries. You can find the download link here:
+- **CSS Parsing**: Paste CSS code with `@apply` directives directly into the plugin interface
+- **Tailwind Class Extraction**: Automatically identifies and extracts Tailwind utility classes from CSS selectors
+- **JSON Output**: Generates structured JSON mapping CSS selector names to their Tailwind classes
+- **Copy to Clipboard**: One-click copying of the parsed output for use in other tools
 
-  https://nodejs.org/en/download/
+## How It Works
 
-Next, install TypeScript using the command:
+1. **Input**: Paste your CSS code containing `@apply` directives
+2. **Parse**: The plugin extracts CSS selectors and their associated Tailwind classes
+3. **Output**: View the structured JSON representation of your typography system
+4. **Export**: Copy the results for documentation or further processing
 
-  npm install -g typescript
+## Example Usage
 
-Finally, in the directory of your plugin, get the latest type definitions for the plugin API by running:
+**Input CSS:**
 
-  npm install --save-dev @figma/plugin-typings
+```css
+.hero-title {
+  @apply text-4xl font-bold leading-tight;
+}
 
-If you are familiar with JavaScript, TypeScript will look very familiar. In fact, valid JavaScript code
-is already valid Typescript code.
+.body-text {
+  @apply text-base font-normal leading-relaxed;
+}
 
-TypeScript adds type annotations to variables. This allows code editors such as Visual Studio Code
-to provide information about the Figma API while you are writing code, as well as help catch bugs
-you previously didn't notice.
+.caption {
+  @apply text-sm font-medium tracking-wide;
+}
+```
 
-For more information, visit https://www.typescriptlang.org/
+**Output JSON:**
 
-Using TypeScript requires a compiler to convert TypeScript (code.ts) into JavaScript (code.js)
-for the browser to run.
+```json
+{
+  "hero-title": {
+    "font-size": "font/size/4xl",
+    "font-weight": "font/weight/bold",
+    "line-height": "font/leading/tight"
+  },
+  "body-text": {
+    "font-size": "font/size/base",
+    "font-weight": "font/weight/normal",
+    "line-height": "font/leading/relaxed"
+  },
+  "caption": {
+    "font-size": "font/size/sm",
+    "font-weight": "font/weight/medium",
+    "letter-spacing": "font/tracking/wide"
+  }
+}
+```
 
-We recommend writing TypeScript code using Visual Studio code:
+## Supported Tailwind Classes
 
-1. Download Visual Studio Code if you haven't already: https://code.visualstudio.com/.
-2. Open this directory in Visual Studio Code.
-3. Compile TypeScript to JavaScript: Run the "Terminal > Run Build Task..." menu item,
-    then select "npm: watch". You will have to do this again every time
-    you reopen Visual Studio Code.
+### Font Sizes
 
-That's it! Visual Studio Code will regenerate the JavaScript file every time you save.
+- `text-xs` through `text-9xl`
+- Custom sizes with bracket notation: `text-[16px]`
+
+### Font Weights
+
+- `font-thin` (100) through `font-black` (900)
+- Custom weights with bracket notation: `font-[450]`
+
+### Font Families
+
+- `font-sans`, `font-serif`, `font-mono`
+- Custom families with bracket notation: `font-[Inter]`
+
+### Line Heights
+
+- `leading-none`, `leading-tight`, `leading-snug`, `leading-normal`, `leading-relaxed`, `leading-loose`
+- Custom line heights with bracket notation: `leading-[1.2]`
+
+### Letter Spacing
+
+- `tracking-tighter` through `tracking-widest`
+- Custom tracking with bracket notation: `tracking-[0.05em]`
+
+### Font Style
+
+- `italic`, `not-italic`
+
+## Installation
+
+1. Download the plugin files
+2. In Figma, go to **Plugins** → **Development** → **Import plugin from manifest**
+3. Select the `manifest.json` file from this project
+4. The plugin will appear in your Figma plugins list
+
+## Development
+
+### Prerequisites
+
+- Node.js and npm
+- TypeScript
+
+### Setup
+
+```bash
+npm install
+npm run build
+```
+
+### Watch Mode
+
+```bash
+npm run watch
+```
+
+This will automatically recompile TypeScript files when changes are detected.
+
+### Linting
+
+```bash
+npm run lint
+npm run lint:fix
+```
+
+## Use Cases
+
+- **Design System Auditing**: Understand which Tailwind classes are being used across your CSS
+- **Documentation Generation**: Create structured documentation of your typography system
+- **Design-Development Sync**: Bridge the gap between CSS implementations and design specifications
+- **Token Analysis**: Analyze usage patterns of design tokens in your codebase
+
+## Technical Details
+
+The plugin consists of two main components:
+
+1. **UI (ui.html)**: Browser-based interface for CSS input and JSON output display
+2. **Plugin Code (code.ts)**: Figma plugin infrastructure with TypeScript support
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests and linting
+5. Submit a pull request
+
+## License
+
+[Add your license information here]
